@@ -34,6 +34,16 @@ jobs:
       - name: Assemble + lint + unit tests
         run: gradle --no-daemon assembleDebug lintDebug testDebugUnitTest
 
+      # The debug APK is what you install on a device to try a change before cutting a release.
+      # Without this the only installable build came from `release.yml`, which needs a version tag
+      # and the signing secrets - too much ceremony to check one fix on one phone.
+      - name: Upload the debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdmesh-agent-debug
+          path: agent-android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
   # NOTE: an emulator-based instrumentation matrix (the "version-treadmill guard" — boot the agent
   # across API levels so SDK_INT-gated breakage surfaces in CI) is deferred until real instrumented
   # (androidTest) tests exist. Running emulators to execute zero tests was slow and flaky (and
