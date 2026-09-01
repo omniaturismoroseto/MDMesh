@@ -19,4 +19,13 @@ object EventType {
     const val CONNECTIVITY = "connectivityChange"
     const val LOW_BATTERY = "lowBattery"
     const val ENROLLED = "enrolled"
+
+    /**
+     * The device brought itself in line with the desired state sent at check-in.
+     *
+     * Recorded because its absence was the actual problem: settings saved in the console
+     * never reached the device, and nothing anywhere said so. An operator could only find
+     * out by picking up the phone and looking.
+     */
+    const val DESIRED_RECONCILED = "desiredReconciled"
 }

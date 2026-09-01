@@ -51,6 +51,14 @@ class CheckInCoordinatorTest {
             telemetrySource = { null },
             eventSink = eventSink,
             syncStatus = syncStatus,
+            // Reconciling is part of the sync loop now. These tests are about the command half,
+            // so it gets in-memory stores and simply finds nothing to do.
+            reconciler = DesiredStateReconciler(
+                dispatcher = CommandDispatcher(emptyList()),
+                kioskState = com.mdmesh.core.store.InMemoryKioskStateStore(),
+                appliedRevision = com.mdmesh.core.store.InMemoryAppliedRevisionStore(),
+                eventSink = eventSink,
+            ),
         )
     }
 

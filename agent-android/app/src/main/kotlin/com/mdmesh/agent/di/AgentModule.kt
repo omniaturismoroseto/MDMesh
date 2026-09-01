@@ -38,6 +38,8 @@ import com.mdmesh.core.sync.HardwareIdSource
 import com.mdmesh.core.install.InstallManager
 import com.mdmesh.core.state.DeviceStateCollector
 import com.mdmesh.core.state.DeviceStateSource
+import com.mdmesh.core.store.AppliedRevisionStore
+import com.mdmesh.core.store.DataStoreAppliedRevisionStore
 import com.mdmesh.core.store.DataStoreKioskStateStore
 import com.mdmesh.core.store.KioskStateStore
 import com.mdmesh.core.telemetry.EventLog
@@ -201,6 +203,16 @@ object AgentModule {
     @Singleton
     fun provideKioskStateStore(@ApplicationContext context: Context): KioskStateStore =
         DataStoreKioskStateStore(context)
+
+    /**
+     * Where the device remembers which revision of the desired state it already applied.
+     * Persisted, not in memory: after a reboot it must not redo work it had already done,
+     * or every power cut would produce a burst of re-application.
+     */
+    @Provides
+    @Singleton
+    fun provideAppliedRevisionStore(@ApplicationContext context: Context): AppliedRevisionStore =
+        DataStoreAppliedRevisionStore(context)
 
     @Provides
     @Singleton

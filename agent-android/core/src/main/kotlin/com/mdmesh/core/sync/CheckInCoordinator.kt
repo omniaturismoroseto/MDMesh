@@ -44,6 +44,7 @@ class CheckInCoordinator @Inject constructor(
     private val eventSink: EventSink,
     private val hardwareIdSource: HardwareIdSource = HardwareIdSource { null },
     private val syncStatus: SyncStatus = SyncStatus(),
+    private val reconciler: DesiredStateReconciler,
 ) {
 
     private val mutex = Mutex()
@@ -95,6 +96,15 @@ class CheckInCoordinator @Inject constructor(
         pending.add(results)
         // Record each command outcome as a timeline event (flushed next cycle).
         results.forEach { eventSink.record(EventType.COMMAND_RESULT, "${it.commandId}:${it.status}") }
+
+        // Then bring the device in line with what the server says it should be. Commands first:
+        // an explicit order from an operator watching the console is more urgent than a
+        // reconcile, and if one of them already changed the kiosk the reconciler sees the new
+        // state and finds nothing left to do.
+        //
+        // Failures never escape: reconciling is best-effort, and a device that cannot align
+        // itself must still finish its check-in - that call is its only way home.
+        runCatching { reconciler.reconcile(data.desired) }
     }
 }
 
