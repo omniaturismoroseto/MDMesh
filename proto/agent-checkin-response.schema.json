@@ -12,6 +12,48 @@
       "type": "array",
       "description": "Capability-gated commands for this device.",
       "items": { "$ref": "command-envelope.schema.json" }
+    },
+    "desired": {
+      "type": "object",
+      "description": "Desired state to reconcile against. A command is an order given once — miss it and it is gone; this describes how the device should be, repeated every check-in, so a device that was off catches up by itself. Optional: absent from older servers, ignored by older agents.",
+      "additionalProperties": true,
+      "properties": {
+        "kiosk": {
+          "description": "Wanted kiosk, same shape as the `kiosk.enter` payload (KioskApplyPayload). null means no kiosk: a device currently in one must leave it.",
+          "type": ["object", "null"],
+          "additionalProperties": true,
+          "properties": {
+            "mode": { "type": "string", "enum": ["launcher", "single"] },
+            "allowedPackages": { "type": "array", "items": { "type": "string" } },
+            "pinPackage": { "type": ["string", "null"] },
+            "features": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "home": { "type": ["boolean", "null"] },
+                "recents": { "type": ["boolean", "null"] },
+                "notifications": { "type": ["boolean", "null"] },
+                "systemInfo": { "type": ["boolean", "null"] },
+                "keyguard": { "type": ["boolean", "null"] },
+                "lockButtons": { "type": ["boolean", "null"] }
+              }
+            },
+            "exitMode": { "type": "string", "enum": ["gesture", "visible", "remote"] },
+            "password": { "type": ["string", "null"] },
+            "theme": { "type": "object", "additionalProperties": true }
+          }
+        },
+        "policies": {
+          "type": "object",
+          "description": "Wanted toggles, keyed as in `policy.apply` (wifi, bluetooth, camera, …). An absent key means unmanaged — which is not the same as false: 'leave it alone' versus 'turn it off'.",
+          "additionalProperties": { "type": "boolean" }
+        },
+        "revision": {
+          "type": "integer",
+          "description": "Bumped on every configuration save. Equal to the applied revision means nothing to do — this is what stops the kiosk being re-applied on every check-in, which would be visible on screen.",
+          "minimum": 0
+        }
+      }
     }
   }
 }

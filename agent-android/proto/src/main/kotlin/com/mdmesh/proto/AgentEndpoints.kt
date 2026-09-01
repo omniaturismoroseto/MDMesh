@@ -70,9 +70,18 @@ data class AgentDeviceStateDto(
     val powerMode: String? = null,
 )
 
-/** `data` payload of the checkin response: capability-gated commands to reconcile. */
+/**
+ * `data` payload of the checkin response: capability-gated commands to reconcile,
+ * plus the device's **desired state**.
+ *
+ * The two differ in kind. A command is an order given once — miss it and it is
+ * gone. [desired] describes how the device should *be*, repeated on every
+ * check-in, so one that was switched off catches up by itself. See
+ * [DesiredState]; `null` (an older server) simply means nothing to reconcile.
+ */
 @Serializable
 data class AgentCheckInResponse(
     val protocolVersion: String = ProtocolJson.PROTOCOL_VERSION,
     val commands: List<CommandEnvelope> = emptyList(),
+    val desired: DesiredState? = null,
 )

@@ -91,6 +91,7 @@ public class AgentResource {
     private AgentEnrollmentTokenDAO tokenDAO;
     private AgentCommandDAO commandDAO;
     private com.hmdm.rest.resource.support.ConfigAppInstaller configAppInstaller;
+    private com.hmdm.rest.resource.support.DesiredStateBuilder desiredStateBuilder;
 
     /**
      * <p>A constructor required by Swagger.</p>
@@ -102,11 +103,13 @@ public class AgentResource {
     public AgentResource(UnsecureDAO unsecureDAO,
                          AgentEnrollmentTokenDAO tokenDAO,
                          AgentCommandDAO commandDAO,
-                         com.hmdm.rest.resource.support.ConfigAppInstaller configAppInstaller) {
+                         com.hmdm.rest.resource.support.ConfigAppInstaller configAppInstaller,
+                         com.hmdm.rest.resource.support.DesiredStateBuilder desiredStateBuilder) {
         this.unsecureDAO = unsecureDAO;
         this.tokenDAO = tokenDAO;
         this.commandDAO = commandDAO;
         this.configAppInstaller = configAppInstaller;
+        this.desiredStateBuilder = desiredStateBuilder;
     }
 
     // =================================================================================================================
@@ -339,7 +342,12 @@ public class AgentResource {
             }
         }
 
-        return Response.OK(new AgentCheckInResponse(commands));
+        // The desired state rides along on every check-in. Commands are orders given once - a
+        // device that was off when one was issued never gets it - while this says how the device
+        // should *be*, so one coming back after days aligns itself without anyone touching the
+        // console. Best-effort: a configuration we cannot read yields null, and the device simply
+        // stays as it is rather than losing its way home.
+        return Response.OK(new AgentCheckInResponse(commands, desiredStateBuilder.build(device)));
     }
 
     /**

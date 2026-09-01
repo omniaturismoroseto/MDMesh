@@ -30,7 +30,12 @@ import java.util.List;
 
 /**
  * <p>{@code data} payload of the Response envelope for {@code POST /public/agent/v1/checkin}.
- * Carries the next batch of capability-gated commands for the device.</p>
+ * Carries the next batch of capability-gated commands for the device, plus its
+ * {@link AgentDesiredState}.</p>
+ *
+ * <p>The two differ in kind. A command is an order given once — miss it and it is
+ * gone. The desired state describes how the device should <i>be</i>, repeated on
+ * every check-in, so one that was switched off catches up by itself.</p>
  */
 @Getter
 @Setter
@@ -42,10 +47,17 @@ public class AgentCheckInResponse {
 
     private List<AgentCommand> commands;
 
+    private AgentDesiredState desired;
+
     public AgentCheckInResponse() {
     }
 
     public AgentCheckInResponse(List<AgentCommand> commands) {
         this.commands = commands;
+    }
+
+    public AgentCheckInResponse(List<AgentCommand> commands, AgentDesiredState desired) {
+        this.commands = commands;
+        this.desired = desired;
     }
 }
